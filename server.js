@@ -1,3 +1,4 @@
+// server.js
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
@@ -9,12 +10,9 @@ app.use(express.json());
 
 // --- Fallback simple por si OpenAI falla ---
 function fakeTranslate(text, targetLang) {
-  // Ejemplos solo para que veas que sí cambia algo
   if (targetLang === "en") return "[EN] " + text;
   if (targetLang === "fr") return "[FR] " + text;
   if (targetLang === "de") return "[DE] " + text;
-
-  // Si no conocemos el idioma, devolvemos igual
   return text;
 }
 
@@ -33,7 +31,6 @@ async function translateWithOpenAI(text, targetLang) {
       Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
-      // Usa el modelo que tengas disponible (ej: "gpt-4.1-mini" o "gpt-4o-mini")
       model: "gpt-4.1-mini",
       messages: [
         {
@@ -53,7 +50,7 @@ async function translateWithOpenAI(text, targetLang) {
 
   if (!response.ok) {
     console.error("Error OpenAI:", response.status, data);
-    return fakeTranslate(text, targetLang); // fallback
+    return fakeTranslate(text, targetLang);
   }
 
   const translated = data.choices?.[0]?.message?.content?.trim();
@@ -86,6 +83,9 @@ app.post("/translate", async (req, res) => {
   }
 });
 
-app.listen(3001, () => {
-  console.log("Servidor de traducción listo (demo): http://localhost:3001");
+// 👉 CLAVE PARA RENDER: usar process.env.PORT
+const PORT = process.env.PORT || 3001;
+
+app.listen(PORT, () => {
+  console.log(`Servidor de traducción listo en el puerto ${PORT}`);
 });
